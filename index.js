@@ -2,7 +2,9 @@ const express = require('express');
 
 const configuration = {
 	port:8080,
-	middleware:[],
+	middleware:[
+		express.json(),
+	],
 	routes:[
 		userResources(),
 	],
