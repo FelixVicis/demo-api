@@ -4,6 +4,7 @@ const configuration = {
 	port:8080,
 	middleware:[],
 	routes:[
+		userResources(),
 	],
 };
 
@@ -18,6 +19,7 @@ function serve(configuration, done = () => null) {
 
 	app.use([
 		...configuration.middleware,
+		...configuration.routes,
 	]);
 
 	app.listen(app.get('port'), () => {
@@ -29,3 +31,12 @@ function serve(configuration, done = () => null) {
 	return app;
 };
 
+function userResources() {
+	const router = express.Router();
+
+	router.get('/user', (request, response) => {
+		response.status(200).json({hello:'world'});
+	});
+
+	return router;
+}
