@@ -1,3 +1,8 @@
+require('dotenv').config();
+
+if (!process.env.VERSION)
+	process.env.VERSION = require('./package.json').version; // eslint-disable-line global-require
+
 const express = require('express');
 const database = require('./database');
 
@@ -7,6 +12,7 @@ const configuration = {
 		express.json(),
 	],
 	routes:[
+		rootDocument(),
 		userResources(),
 	],
 };
@@ -33,6 +39,65 @@ function serve(configuration, done = () => null) {
 
 	return app;
 };
+
+function rootDocument() {
+	const router = express.Router();
+
+	router.get('/index.json',(request, response) => {
+
+		return response.status(200).json({
+			host       : request.hostname,
+			deployment : process.env.DEPLOYMENT,
+			env        : process.env.NODE_ENV,
+			version    : process.env.VERSION,
+		})
+	})
+
+	router.get('/', (request,response) => {
+		return response.status(200)
+		.set({
+			'Cache-Control' : 'max-age=0',
+			'Expires'       : new Date().toUTCString(),
+			'Content-Type'  : 'text/html',
+		})
+		.send(function render(data) {
+			return [
+				`
+				<!DOCTYPE html>
+				<html lang="en" dir="ltr">
+					<head>
+						<meta charset="utf-8">
+						<title>${data.title}</title>
+						<style type="text/css" media="screen">
+							html, body { background-color: #111; color: #acf; }
+							body { margin: 0.5rem; }
+						</style>
+					</head>
+					<body>
+						<h2>Hello World</h2>
+						<h3>Env Variables</h3>
+						<table>
+							<tbody>
+								`,
+								Object.entries(data).map(([key,value]) => `<tr><td>${key}</td><td>${JSON.stringify(value)}</td></tr>`).join(''),
+								`
+							</tbody>
+						</table>
+					</body>
+				</html>
+				`,
+			].join('').replace(/[\t\n]+/g,'');
+		}({
+			title      : 'Hello Index',
+			host       : request.hostname,
+			deployment : process.env.DEPLOYMENT,
+			env        : process.env.NODE_ENV,
+			version    : process.env.VERSION,
+		}))
+	});
+
+	return router;
+}
 
 function userResources() {
 	const router = express.Router();
