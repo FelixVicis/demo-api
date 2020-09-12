@@ -74,7 +74,7 @@ function rootDocument() {
 						</style>
 					</head>
 					<body>
-						<h2>Hello World</h2>
+						<h2>${data.host} Debugging</h2>
 						<h3>Env Variables</h3>
 						<table>
 							<tbody>
@@ -90,6 +90,7 @@ function rootDocument() {
 		}({
 			title      : 'Hello Index',
 			host       : request.hostname,
+			ip         : request.ip,
 			deployment : process.env.DEPLOYMENT,
 			env        : process.env.NODE_ENV,
 			version    : process.env.VERSION,
